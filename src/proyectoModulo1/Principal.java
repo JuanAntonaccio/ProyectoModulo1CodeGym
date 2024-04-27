@@ -65,8 +65,9 @@ public class Principal {
                     break;
             }
         }
-        // Cerramos el scanner al terminar el loop
+        // Cerramos los scanner al terminar el loop
         sc.close();
+        otro.close();
         System.out.println();
         System.out.println();
         System.out.println("=".repeat(80));
@@ -316,7 +317,9 @@ public class Principal {
         // Detiene el ejución para mostrar mensajes
         // durante medio segundo
         try {
-            Thread.sleep(tiempo); // Esperar medio segundo para poder ver el mensaje
+            Thread.sleep(tiempo); // Esperar determinados milisegundos
+                                  // para poder ver el mensaje
+                                  // donde 1000 ms = 1 segundo
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

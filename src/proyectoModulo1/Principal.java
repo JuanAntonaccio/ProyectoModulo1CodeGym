@@ -32,25 +32,31 @@ public class Principal {
             }
             switch (opcion) {
                 case 1:
+                    // leer el número que identifica el factor de cifrado
                     leerFactor();
                     break;
                 case 2:
-
+                    // Se lee el  texto a guardar en el archivo de texto a ser encriptado
                     System.out.println("Ingrese el texto a guadar en el archivo: ");
                     String texto = otro.nextLine();
                     guardarMensaje(texto, "TextoOrigen.txt");
                     break;
                 case 3:
-                    String texto2 = leerArchivo("TextoOrigen.txt");
-                    encriptarArchivo(texto2);
+                    // Se encripta el archivo de texto, en uno ecriptado por el factor Cesar
+                    String textoAEncriptar = leerArchivo("TextoOrigen.txt");
+                    encriptarArchivo(textoAEncriptar);
                     break;
                 case 4:
+                    // Desencriptar el archivo por fuerza bruta
                     desencriptarFuerzaBruta();
                     break;
                 case 5:
+                    // Hace un cripto análisis de los caracteres más usados en el texto
+                    // original y texto ecnriptado, y hace la diferencia para conocer el factor.
                     criptoanalisis();
                     break;
                 case 0:
+                    // Opción para salir
                     salir = false;
                     sc.close();
                     break;
@@ -69,17 +75,26 @@ public class Principal {
 
     }
 
+    // Métodos usados para las opciones del menú
+
+
+    // Método para leer el factor
+    // Se encapsula el factor entre números enteros entre 1 y 30.
+    // Lo guarda en una variable estatica en la clase Palabras
     private static void leerFactor() {
-        Scanner sc2 = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in);
         System.out.println("Ingrese el factor clave Cesar (1-30) ");
         boolean valido = true;
         while (valido) {
             try {
-                int num = sc2.nextInt();
-                if (num < 1 || num > 30) {
+                int factorCesar = scanner.nextInt();
+                if (factorCesar < 1 || factorCesar > 30) {
+                    // Si el numero ingresado esta fuera de rango se solicita nuevamente
                     System.out.println("Ingrese el factor clave Cesar (1-30) ");
                 } else {
-                    Palabras.factor = num;
+                    // Si el factor esta en el rango, se guarda en la
+                    // variable estatica de la clase Palabras y se sale del while
+                    Palabras.factor = factorCesar;
                     valido = false;
                 }
 
@@ -88,8 +103,14 @@ public class Principal {
             }
         }
         System.out.println("Factor aceptado correctamente");
+        esperarMiliSegundos(1000);
     }
 
+    // Metodo para realizar el criptoanalisis
+    // Se leen los dos archivos el origen y el encriptado y se analizan
+    // en cada uno de ellos cual es el caracter que más veces aparece en cada
+    // uno de los textos, luego se hace una diferencia para saber de esa
+    // forma cual es el factor
     private static void criptoanalisis() {
         String textoOrigen = leerArchivo("TextoOrigen.txt");
         String textoEncriptado = leerArchivo("Encriptado.txt");
@@ -103,6 +124,8 @@ public class Principal {
                 carmayOrigen = c;
             }
         }
+        // Al final de este bucle sabemos cual es el caracter que aparece más veces
+        // en el texto origen
         int mayorEncri = 0;
         Character carmayEncri = 'a';
         for (Character c : conteoCaracteresEncrip.keySet()) {
@@ -111,11 +134,17 @@ public class Principal {
                 carmayEncri = c;
             }
         }
+        // Al final de este bucle sabemos cual es el caracter que aparece más veces
+        // en el texto encriptado
+
+        // Si son iguales la cantidad de veces que se repiten en los diferentes textos
+        // hacemos la diferencia para saber el factor obtenido
         if (mayorOrigen == mayorEncri) {
             int valorOrigen = (int) carmayOrigen;
             int valorEncrip = (int) carmayEncri;
             int resultado = valorEncrip - valorOrigen;
-            System.out.println("El valor numero fuerza bruta es: " + resultado);
+            System.out.println("El valor número fuerza bruta es: " + resultado);
+            esperarMiliSegundos(1000);
         } else {
             System.out.println("El valor numero fuerza no fue encontrado");
         }
@@ -123,6 +152,8 @@ public class Principal {
 
     }
 
+    // Metodo auxiliar usado por el método de criptoanalisis que nos devuelve
+    // un mapa con cada caracter que contiene en el texto y las veces que este aparece
     private static Map<Character, Integer> contarCaracteres(String cadena) {
         Map<Character, Integer> conteoCaracteres = new HashMap<>();
 
@@ -139,20 +170,33 @@ public class Principal {
         return conteoCaracteres;
     }
 
+    // Metodo para desencriptar por fuerza bruta, lo que hace es recorrer todos los factores
+    // posibles entre 1 y 30 (ya que fueron acotados al principio el factor a seleccionar)
     private static void desencriptarFuerzaBruta() {
-
+        // Lee el archivo encriptado
         String textoEncriptado = leerArchivo("Encriptado.txt");
+
+        // Creo una instancia de la clase Palabras, en donde tengo una serie de
+        // métodos a trabajar con palabras
         Palabras pal = new Palabras();
 
         if (textoEncriptado.length() > 0) {
             for (int i = 1; i <= 30; i++) {
+                // llama al método de desencritar con el indice del factor que estoy
+                // iterando en el bucle for
+
+                // llama al método desencriptar pasando el factor y el texto encriptado
                 String result = desencriptar(i, textoEncriptado);
                 double porc = pal.contarPalabras(result);
                 System.out.println("Porcentaje: " + porc);
+                // De acuerdo a las pruebas realizadas, si tenemos un porcentaje de acierto
+                // mayor al 60% , estamos en condiciones de afirmar que encontramos el factor
+                // adecuado para desencriptar.
                 if (porc > 0.6) {
                     System.out.println("Texto desencriptado: " + result);
                     System.out.printf("Porcentaje: %.2f %n ", porc);
                     System.out.printf("Numero es: %d %n ", i);
+                    esperarMiliSegundos(1000);
                     break;
                 }
             }
@@ -162,8 +206,11 @@ public class Principal {
         }
     }
 
+    // Metodo que descencrita el texto pasando el factor y el texto a desencriptar
     private static String desencriptar(int numero, String texto) {
         String resultado;
+        // Utilizamos el StringBuilder para ir agregando caracter a caracter del
+        // texto desencriptado
         StringBuilder encriptado = new StringBuilder();
         for (int i = 0; i < texto.length(); i++) {
             int valor = texto.charAt(i) - numero;
@@ -174,6 +221,7 @@ public class Principal {
         return resultado;
     }
 
+    // Metodo para leer y devolver el contenido de un archivo de texto
     private static String leerArchivo(String archivo_a_leer) {
         String resultado = null;
         File archivo = null;
@@ -210,6 +258,7 @@ public class Principal {
         return resultado;
     }
 
+    // Metodo para encriptar un archivo
     private static void encriptarArchivo(String texto) {
         StringBuilder encri = new StringBuilder("");
         for (int i = 0; i < texto.length(); i++) {
@@ -244,14 +293,10 @@ public class Principal {
             }
         }
         System.out.println("Texto guardado en archivo correctamente");
-        try {
-            Thread.sleep(500); // Esperar medio segundo para poder ver el mensaje
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        esperarMiliSegundos(600);
     }
 
-    // mensaje que muestra el menu del programa
+    // método que muestra el menu del programa
     private static void imprimirPantalla() {
         System.out.println();
         System.out.println();
@@ -266,5 +311,15 @@ public class Principal {
         System.out.println("Ingrese su opción: ");
     }
 
+    // metodo para detener la ejecución del programa por medio segundo
+    private static void esperarMiliSegundos(int tiempo){
+        // Detiene el ejución para mostrar mensajes
+        // durante medio segundo
+        try {
+            Thread.sleep(tiempo); // Esperar medio segundo para poder ver el mensaje
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
 }
